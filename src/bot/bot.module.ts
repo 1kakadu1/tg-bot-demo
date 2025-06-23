@@ -4,10 +4,12 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { sessionMiddleware } from 'src/middleware/session.middelware';
 import { loggingMiddleware } from 'src/middleware/middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GigachatModule } from 'src/gigachat/gigachat.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    GigachatModule,
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

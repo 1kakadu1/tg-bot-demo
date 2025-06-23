@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Command, Ctx, Help, InjectBot, Message, On, Start, Update, } from 'nestjs-telegraf';
+import { GigachatService } from 'src/gigachat/gigachat.service';
 import { Context, Telegraf } from 'telegraf';
+import { Agent } from 'node:https';
 
 @Update()
 @Injectable()
@@ -8,6 +10,8 @@ export class BotUpdate {
   constructor(
     @InjectBot()
     private readonly bot: Telegraf<Context>,
+    @Inject(GigachatService) 
+    private readonly ai: GigachatService
   ) {}
 
   @Start()
@@ -48,6 +52,20 @@ export class BotUpdate {
     });
   }
 
+  @Command("order")
+  async orderCommand(@Ctx() ctx: Context) {
+    await ctx.reply('Заказать услуги следующие:', {
+      reply_markup: {
+        inline_keyboard: [
+          [{
+            text: 'Запустить приложение',
+            web_app: { url: 'https://mini-app-dd-news.vercel.app/' }
+          }]
+        ]
+      }
+    });
+  }
+
   @On('sticker')
   async onSticker(@Ctx() ctx: Context) {
     await ctx.reply('Классный стикер! 😊');
@@ -55,7 +73,14 @@ export class BotUpdate {
 
   @On('text')
   async onMessage(@Message('text') text: string, @Ctx() ctx: Context) {
-    await ctx.reply(`Вы сказали: "${text}"`);
+    try {
+      const data = await this.ai.sendMessage(text);
+      console.log(JSON.stringify(data));
+      await ctx.reply(data.map(item => item.message.content).join(". "));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      await ctx.reply(`Ошибка: "${JSON.stringify(error)}"`);
+    }
   }
 
 }
