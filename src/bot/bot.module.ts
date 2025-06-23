@@ -13,12 +13,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: async (configService: ConfigService) => ({
         middlewares: [sessionMiddleware, loggingMiddleware],
         token: configService.get<string>('TG_BOT_API_KEY') || process.env.TG_BOT_API_KEY,
-        // launchOptions: {
-        //   webhook: {
-        //     domain: 'your-domain.com',
-        //     hookPath: '/secret-path',
-        //   },
-        // },
+        launchOptions: {
+        webhook: {
+            domain: 'tg-bot-demo-5eg8.onrender.com',
+            path: '/secret-path',
+          }
+        }
       }),
       inject: [ConfigService],
     }),
